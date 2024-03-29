@@ -33,9 +33,9 @@
   "module": "dist/rapidoc-min.js",
   "mode": "production",
   "dependencies": {
-    "@apitools/openapi-parser": "0.0.32",
     "base64-arraybuffer": "^1.0.2",
     "buffer": "^6.0.3",
+    "js-yaml": "^4.1.0",
     "lit": "^2.7.5",
     "marked": "^5.1.0",
     "prismjs": "^1.29.0",

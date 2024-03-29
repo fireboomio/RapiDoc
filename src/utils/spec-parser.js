@@ -1,6 +1,7 @@
 /* eslint-disable no-use-before-define */
-import OpenApiParser from '@apitools/openapi-parser';
+// import OpenApiParser from '@apitools/openapi-parser';
 import { marked } from 'marked';
+import { load } from 'js-yaml';
 import { invalidCharsRegEx, rapidocApiKey, sleep } from '~/utils/common-utils';
 
 export default async function ProcessSpec(specUrl, generateMissingTags = false, sortTags = false, sortEndpointsBy = '', attrApiKey = '', attrApiKeyLocation = '', attrApiKeyValue = '', serverUrl = '') {
@@ -9,9 +10,31 @@ export default async function ProcessSpec(specUrl, generateMissingTags = false, 
     this.requestUpdate(); // important to show the initial loader
     let specMeta;
     if (typeof specUrl === 'string') {
-      specMeta = await OpenApiParser.resolve({ url: specUrl, allowMetaPatches: false }); // Swagger(specUrl);
+      const resp = await fetch(specUrl);
+      try {
+        if (specUrl.endsWith('yaml') || specUrl.endsWith('yml') || resp.headers.get('content-type')?.includes('yaml')) {
+          const yaml = await resp.text();
+          const json = load(yaml);
+          specMeta = {
+            resolvedSpec: json,
+            spec: json,
+          };
+        } else {
+          const json = await resp.json();
+          specMeta = {
+            resolvedSpec: json,
+            spec: json,
+          };
+        }
+      } catch (error) {
+        specMeta = {};
+      }
+      // specMeta = await OpenApiParser.resolve({ url: specUrl, allowMetaPatches: false }); // Swagger(specUrl);
     } else {
-      specMeta = await OpenApiParser.resolve({ spec: specUrl, allowMetaPatches: false }); // Swagger({ spec: specUrl });
+      specMeta = {
+        spec: specUrl,
+      };
+      // specMeta = await OpenApiParser.resolve({ spec: specUrl, allowMetaPatches: false }); // Swagger({ spec: specUrl });
     }
     await sleep(0); // important to show the initial loader (allows for rendering updates)
 
